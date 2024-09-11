@@ -1,0 +1,17 @@
+{
+  "name": "giggles-and-grins-back-end",
+  "version": "1.0.0",
+  "description": "A e-commerce website for a baby shop",
+  "main": "server.js",
+  "scripts": {
+     "start": "node server",
+    "dev" : "nodemon server"
+  },
+  "author": "Muhammed",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.20.0",
+    "express-validator": "^7.2.0",
+    "nodemon": "^3.1.4"
+  }
+}

@@ -1,5 +1,5 @@
 const express = require('express')
-const boysClothesController = require('../controllers/boyClothesController')
+const boysClothesController = require('../controllers/itemsController')
 
 const boysRouter = express.Router()
 

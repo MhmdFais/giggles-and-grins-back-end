@@ -4,12 +4,13 @@
   "description": "A e-commerce website for a baby shop",
   "main": "server.js",
   "scripts": {
-     "start": "node server",
-    "dev" : "nodemon server"
+    "start": "node server",
+    "dev": "nodemon server"
   },
   "author": "Muhammed",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.20.0",
     "express-validator": "^7.2.0",
     "nodemon": "^3.1.4"

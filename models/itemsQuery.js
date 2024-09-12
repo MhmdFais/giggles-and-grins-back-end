@@ -42,3 +42,5 @@ async function getItemsInACategory(categoryName) {
     return rows;
 }
 
+
+

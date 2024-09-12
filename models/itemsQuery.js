@@ -42,5 +42,69 @@ async function getItemsInACategory(categoryName) {
     return rows;
 }
 
+async function deleteAnItem(itemID) {
+    try {
+        const query = 'DELETE FROM items WHERE id = $1';
+        await pool.query(query, [itemID]);
+
+        console.log(`Item with ID ${itemID} deleted successfully.`);
+        return { message: `Item with ID ${itemID} deleted successfully.` };
+    } catch (error) {
+        console.error('Error deleting item:', error);
+        throw new Error('Error deleting the item.');
+    }
+}
+
+async function editAnItem(itemID, updatedItemData, categoryName) {
+    const { name, price, quantity, available_sizes, description, category_id, image_url, categorySpecificFields } = updatedItemData;
+
+    try {
+        // items table
+        const updateItemsQuery = `
+            UPDATE items 
+            SET 
+                name = $1,
+                price = $2,
+                quantity = $3,
+                available_sizes = $4,
+                description = $5,
+                category_id = $6,
+                image_url = $7,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $8
+        `;
+
+        await pool.query(updateItemsQuery, [
+            name, 
+            price, 
+            quantity, 
+            available_sizes, 
+            description, 
+            category_id, 
+            image_url, 
+            itemID
+        ]);
+
+        // category specific table
+        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`; // 'boys_clothes', 'diapers'
+        const categoryFields = categorySpecificFields.map((field, index) => `${field} = $${index + 2}`).join(', '); 
+
+        const updateCategoryQuery = `
+            UPDATE ${categoryTable} 
+            SET ${categoryFields}
+            WHERE item_id = $1
+        `;
+
+        const categoryValues = [itemID, ...Object.values(categorySpecificFields)];
+        await pool.query(updateCategoryQuery, categoryValues);
+
+        console.log(`Item with ID ${itemID} updated successfully in both tables.`);
+        return { message: `Item with ID ${itemID} updated successfully.` };
+    } catch (error) {
+        console.error('Error updating item:', error);
+        throw new Error('Error updating the item.');
+    }
+}
+
 
 

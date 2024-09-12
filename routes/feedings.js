@@ -4,6 +4,7 @@ const feedingsController = require('../controllers/itemsController')
 const feedingsRouter = express.Router()
 
 feedingsRouter.get('/', feedingsController.get)
+feedingsRouter.get('/add-item', feedingsController.addAnItem)
 feedingsRouter.get('/view-item/:id', feedingsController.viewAnItem)
 feedingsRouter.delete('/view-item/:id/delete', feedingsController.deleteAnItem)
 feedingsRouter.get('/view-item/:id/edit', feedingsController.editAnItem)

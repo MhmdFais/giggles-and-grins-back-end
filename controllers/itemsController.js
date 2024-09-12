@@ -18,10 +18,15 @@ function enterEditedItem(req, res) {
     // Logic to handle the edited item submission
 }
 
+function addAnItem(req, res) {
+    // Logic to add an item
+}
+
 module.exports = {
     get,
     viewAnItem,
     deleteAnItem,
     editAnItem,
-    enterEditedItem
+    enterEditedItem,
+    addAnItem
 };

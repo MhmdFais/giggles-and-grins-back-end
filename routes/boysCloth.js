@@ -4,6 +4,7 @@ const boysClothesController = require('../controllers/itemsController')
 const boysRouter = express.Router()
 
 boysRouter.get('/', boysClothesController.get)
+boysRouter.get('/add-item', boysClothesController.addAnItem)
 boysRouter.get('/view-item/:id', boysClothesController.viewAnItem)
 boysRouter.delete('/view-item/:id/delete', boysClothesController.deleteAnItem)
 boysRouter.get('/view-item/:id/edit', boysClothesController.editAnItem)

@@ -106,5 +106,101 @@ async function editAnItem(itemID, updatedItemData, categoryName) {
     }
 }
 
+async function getItemById(itemId, categoryName) {
+    try {
+        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`;
+        const fields = categoryFields[categoryTable];
+
+        if (!fields) {
+            throw new Error(`Category "${categoryName}" not found`);
+        }
+
+        const selectFields = fields.map(field => `c.${field}`).join(', ');
+
+        const query = `
+            SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, i.image_url, i.description, ${selectFields}
+            FROM items i
+            JOIN ${categoryTable} c ON i.id = c.item_id
+            WHERE i.id = $1
+        `;
+
+        const { rows } = await pool.query(query, [itemId]);
+        if (rows.length === 0) {
+            throw new Error(`Item with ID ${itemId} not found in category "${categoryName}".`);
+        }
+
+        return rows[0];
+    } catch (error) {
+        console.error('Error fetching item by ID:', error);
+        throw new Error('Error fetching item by ID.');
+    }
+}
+
+async function addItem(newItemData, categoryName) {
+    const client = await pool.connect();
+
+    try {
+        const {
+            name,
+            price,
+            quantity,
+            available_sizes,
+            description,
+            category_id,
+            image_url,
+            categorySpecificFields
+        } = newItemData;
+
+        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`;
+        const fields = categoryFields[categoryTable];
+
+        if (!fields) {
+            throw new Error(`Category "${categoryName}" not found.`);
+        }
+
+        await client.query('BEGIN');
+
+        const insertItemQuery = `
+            INSERT INTO items (name, price, quantity, available_sizes, description, category_id, image_url, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
+            RETURNING id
+        `;
+
+        const { rows } = await client.query(insertItemQuery, [
+            name, price, quantity, available_sizes, description, category_id, image_url
+        ]);
+
+        const newItemId = rows[0].id;
+
+        const insertCategoryQuery = `
+            INSERT INTO ${categoryTable} (item_id, ${fields.join(', ')})
+            VALUES ($1, ${fields.map((_, i) => `$${i + 2}`).join(', ')})
+        `;
+
+        await client.query(insertCategoryQuery, [newItemId, ...Object.values(categorySpecificFields)]);
+
+        await client.query('COMMIT');
+
+        return { message: `Item added to category "${categoryName}" successfully`, itemId: newItemId };
+    } catch (error) {
+        await client.query('ROLLBACK'); 
+        console.error('Error adding item:', error);
+        throw new Error('Error adding item.');
+    } finally {
+        client.release();
+    }
+}
+
+
+
+module.exports = {
+    deleteAnItem,
+    getAllItems,
+    getItemsInACategory,
+    editAnItem,
+    getItemById,
+    addItem
+}
+
 
 

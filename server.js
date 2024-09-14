@@ -18,18 +18,19 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-const express = require('express');
+const express = require('express')
 const app = express()
+app.use(express.json())
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use('./',indexRouter)
-app.use('./babygear', babyGearsRouter)
-app.use('./boys', boysClothRouter)
-app.use('./diapers', diapersRouter)
-app.use('./feeding', feedingsRouter)
-app.use('./girls', girlsClothRouter)
-app.use('./toys', toysRouter)
+app.use('/',indexRouter)
+app.use('/babygear', babyGearsRouter)
+app.use('/boys', boysClothRouter)
+app.use('/diapers', diapersRouter)
+app.use('/feeding', feedingsRouter)
+app.use('/girls', girlsClothRouter)
+app.use('/toys', toysRouter)
 
 const port = process.env.PORT || 8080
 

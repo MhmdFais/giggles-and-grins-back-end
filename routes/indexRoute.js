@@ -6,5 +6,5 @@ const indexRoute = express.Router()
 indexRoute.get('/', indexController.get)
 
 module.exports = {
-    indexController
+    indexRoute
 }

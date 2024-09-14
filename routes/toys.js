@@ -10,4 +10,4 @@ toysRouter.delete('/view-item/:id/delete', toysController.deleteAnItemInCategory
 toysRouter.get('/view-item/:id/edit', toysController.editAnItemInCategory)
 toysRouter.post('/view-item/:id/edit', toysController.enterEditedItem)
 
-module.exports = {toysRouter}
+module.exports = toysRouter

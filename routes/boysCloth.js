@@ -10,4 +10,4 @@ boysRouter.delete('/view-item/:id/delete', boysClothesController.deleteAnItemInC
 boysRouter.get('/view-item/:id/edit', boysClothesController.editAnItemInCategory)
 boysRouter.post('/view-item/:id/edit', boysClothesController.enterEditedItem)
 
-module.exports = {boysRouter}
+module.exports = boysRouter

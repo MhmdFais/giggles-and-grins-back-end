@@ -10,4 +10,4 @@ girlsClothRoute.delete('/view-item/:id/delete', girlsClothController.deleteAnIte
 girlsClothRoute.get('/view-item/:id/edit', girlsClothController.editAnItemInCategory)
 girlsClothRoute.post('/view-item/:id/edit', girlsClothController.enterEditedItem)
 
-module.exports = {girlsClothRoute}
+module.exports = girlsClothRoute

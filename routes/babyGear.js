@@ -10,4 +10,4 @@ babyGearsRouter.delete('/view-item/:id/delete', babyGearController.deleteAnItemI
 babyGearsRouter.get('/view-item/:id/edit', babyGearController.editAnItemInCategory)
 babyGearsRouter.post('/view-item/:id/edit', babyGearController.enterEditedItem)
 
-module.exports = {babyGearsRouter}
+module.exports = babyGearsRouter

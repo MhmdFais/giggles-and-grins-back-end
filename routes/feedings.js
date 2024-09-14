@@ -1,4 +1,4 @@
-const require = require('express')
+const express = require('express')
 const feedingsController = require('../controllers/itemsController')
 
 const feedingsRouter = express.Router()
@@ -10,4 +10,4 @@ feedingsRouter.delete('/view-item/:id/delete', feedingsController.deleteAnItemIn
 feedingsRouter.get('/view-item/:id/edit', feedingsController.editAnItemInCategory)
 feedingsRouter.post('/view-item/:id/edit', feedingsController.enterEditedItem)
 
-module.exports = {feedingsRouter}
+module.exports = feedingsRouter

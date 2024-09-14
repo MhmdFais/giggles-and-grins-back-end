@@ -10,4 +10,4 @@ diapersRouter.delete('/view-item/:id/delete', diapersController.deleteAnItemInCa
 diapersRouter.get('/view-item/:id/edit', diapersController.editAnItemInCategory)
 diapersRouter.post('/view-item/:id/edit', diapersController.enterEditedItem)
 
-module.exports = {diapersRouter}
+module.exports = diapersRouter

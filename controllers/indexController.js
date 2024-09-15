@@ -1,6 +1,6 @@
 const {getAllItems} = require('../models/itemsQuery')
 
-async function get(res, req){
+async function get(req, res){
     try{
         const items = await getAllItems();
         res.json(items);
@@ -11,6 +11,4 @@ async function get(res, req){
     }
 }
 
-module.exports = {
-    get
-}
+module.exports ={get}

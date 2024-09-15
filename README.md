@@ -2,7 +2,7 @@
 
 This is the backend of the Giggles & Grins e-commerce project, a kid's accessories online store. It is built using Node.js and Express.js and interacts with a PostgreSQL database to handle various CRUD operations for product categories such as boys' clothes, girls' clothes, baby gear, diapers, feeding supplies, and toys.
 
-### To Giggles & Grins front-end (Click Here)[https://github.com/MhmdFais/giggles-and-grins-front-end]
+### To Giggles & Grins front-end [Click Here](https://github.com/MhmdFais/giggles-and-grins-front-end)
 
 # Features
 

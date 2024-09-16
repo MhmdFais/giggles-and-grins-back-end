@@ -32,7 +32,7 @@ async function getItemsInACategory(categoryName) {
     const selectFields = fields.map(field => `c.${field}`).join(', ');
 
     const query = `
-        SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, i.image_url, ${selectFields}
+        SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, ${selectFields}
         FROM items i
         JOIN ${categoryName} c ON i.id = c.item_id
         WHERE i.category_id = $1

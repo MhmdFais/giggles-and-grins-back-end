@@ -1,8 +1,10 @@
-const { getItemsInACategory, deleteAnItem, editAnItem, getAllItems, getItemById, addItem } = require('../models/itemsQuery');
+const { getItemsInACategory, deleteAnItem, editAnItem, getItemById, addItem } = require('../models/itemsQuery');
 
 async function get(req, res) {
     try{
+        console.log("Fetching items.......");
         const category = req.baseUrl.split('/')[1]
+        console.log(`Fetching items for category: ${category}`);
         const items = await getItemsInACategory(category)
         res.json(items)
     }

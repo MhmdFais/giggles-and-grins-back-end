@@ -22,11 +22,11 @@ async function getItemsInACategory(categoryName) {
     }
     
     const categoryId = categoryResult.rows[0].id;
-    const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}_clothes`; 
-    const fields = categoryFields[categoryTable];  
+    //const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}_clothes`; 
+    const fields = categoryFields[categoryName];  
     
     if (!fields) {
-        throw new Error(`Category table "${categoryTable}" not found`);
+        throw new Error(`Category table "${categoryName}" not found`);
     }
 
     const selectFields = fields.map(field => `c.${field}`).join(', ');
@@ -34,7 +34,7 @@ async function getItemsInACategory(categoryName) {
     const query = `
         SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, i.image_url, ${selectFields}
         FROM items i
-        JOIN ${categoryTable} c ON i.id = c.item_id
+        JOIN ${categoryName} c ON i.id = c.item_id
         WHERE i.category_id = $1
     `;
 

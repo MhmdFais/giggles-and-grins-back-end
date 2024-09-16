@@ -4,14 +4,14 @@ const express = require('express');
 const cors = require('cors');
 
 const indexRouter = require('./routes/indexRoute');
-const babyGearsRouter = require('./routes/babyGear');
-const boysClothRouter = require('./routes/boysCloth');
-const diapersRouter = require('./routes/diapers');
-const feedingsRouter = require('./routes/feedings');
-const girlsClothRouter = require('./routes/girlsCloth');
-const toysRouter = require('./routes/toys');
+const babyGearsRouter = require('./routes/babyGearsRouter');
+const boysClothRouter = require('./routes/boysClothRouter');
+const diapersRouter = require('./routes/diapersRouter');
+const feedingsRouter = require('./routes/feedingsRouter');
+const girlsClothRouter = require('./routes/girlsClothRouter');
+const toysRouter = require('./routes/toysRouter');
 
-const app = express();  // Declare and initialize app before using it
+const app = express();  
 
 const corsOptions = {
     origin: 'http://localhost:5173', 
@@ -25,11 +25,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/', indexRouter);
-app.use('/babygear', babyGearsRouter);
-app.use('/boys', boysClothRouter);
+app.use('/baby_gear', babyGearsRouter);
+app.use('/boys_clothes', boysClothRouter);
 app.use('/diapers', diapersRouter);
-app.use('/feeding', feedingsRouter);
-app.use('/girls', girlsClothRouter);
+app.use('/feedings', feedingsRouter);
+app.use('/girls_clothes', girlsClothRouter);
 app.use('/toys', toysRouter);
 
 const port = process.env.PORT || 8080;

@@ -22,7 +22,6 @@ async function getItemsInACategory(categoryName) {
     }
     
     const categoryId = categoryResult.rows[0].id;
-    //const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}_clothes`; 
     const fields = categoryFields[categoryName];  
     
     if (!fields) {
@@ -32,7 +31,7 @@ async function getItemsInACategory(categoryName) {
     const selectFields = fields.map(field => `c.${field}`).join(', ');
 
     const query = `
-        SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, ${selectFields}
+        SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, c.category_id, ${selectFields}
         FROM items i
         JOIN ${categoryName} c ON i.id = c.item_id
         WHERE i.category_id = $1

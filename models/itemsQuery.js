@@ -55,10 +55,13 @@ async function deleteAnItem(itemID) {
 }
 
 async function editAnItem(itemID, updatedItemData, categoryName) {
-    const { name, price, quantity, available_sizes, description, category_id, image_url, categorySpecificFields } = updatedItemData;
+    const { name, price, quantity, available_sizes, description, category_id } = updatedItemData;
 
     try {
-        // items table
+        // Start a transaction
+        await pool.query('BEGIN');
+
+        // Update items table
         const updateItemsQuery = `
             UPDATE items 
             SET 
@@ -68,9 +71,8 @@ async function editAnItem(itemID, updatedItemData, categoryName) {
                 available_sizes = $4,
                 description = $5,
                 category_id = $6,
-                image_url = $7,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $8
+                created_at = CURRENT_TIMESTAMP
+            WHERE id = $7
         `;
 
         await pool.query(updateItemsQuery, [
@@ -80,28 +82,74 @@ async function editAnItem(itemID, updatedItemData, categoryName) {
             available_sizes, 
             description, 
             category_id, 
-            image_url, 
             itemID
         ]);
 
-        // category specific table
-        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`; // 'boys_clothes', 'diapers'
-        const categoryFields = categorySpecificFields.map((field, index) => `${field} = $${index + 2}`).join(', '); 
+        // Update category specific table
+        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`;
+        let updateCategoryQuery = '';
+        let categoryValues = [];
 
-        const updateCategoryQuery = `
-            UPDATE ${categoryTable} 
-            SET ${categoryFields}
-            WHERE item_id = $1
-        `;
+        switch (categoryName) {
+            case 'boys_clothes':
+            case 'girls_clothes':
+                updateCategoryQuery = `
+                    UPDATE ${categoryTable} 
+                    SET color = $2, material = $3
+                    WHERE item_id = $1
+                `;
+                categoryValues = [itemID, updatedItemData.color, updatedItemData.material];
+                break;
+            case 'baby_gear':
+                updateCategoryQuery = `
+                    UPDATE ${categoryTable} 
+                    SET weight_capacity = $2, dimensions = $3
+                    WHERE item_id = $1
+                `;
+                categoryValues = [itemID, updatedItemData.weight_capacity, updatedItemData.dimensions];
+                break;
+            case 'feedings':
+                updateCategoryQuery = `
+                    UPDATE ${categoryTable} 
+                    SET type = $2, age_range = $3
+                    WHERE item_id = $1
+                `;
+                categoryValues = [itemID, updatedItemData.type, updatedItemData.age_range];
+            case 'toys':
+                updateCategoryQuery = `
+                    UPDATE ${categoryTable} 
+                    SET age_range = $2, material = $3
+                    WHERE item_id = $1
+                `;
+                categoryValues = [itemID, updatedItemData.age_range, updatedItemData.material];
+                break;
+            case 'diapers':
+                updateCategoryQuery = `
+                    UPDATE ${categoryTable} 
+                    SET size = $2, pack_size = $3
+                    WHERE item_id = $1
+                `;
+                categoryValues = [itemID, updatedItemData.size, updatedItemData.pack_size];
+                break;
+            default:
+                throw new Error(`Unknown category: ${categoryName}`);
+        }
 
-        const categoryValues = [itemID, ...Object.values(categorySpecificFields)];
+        console.log('Update category query:', updateCategoryQuery);
+        console.log('Category values:', categoryValues);
+
         await pool.query(updateCategoryQuery, categoryValues);
+
+        // Commit the transaction
+        await pool.query('COMMIT');
 
         console.log(`Item with ID ${itemID} updated successfully in both tables.`);
         return { message: `Item with ID ${itemID} updated successfully.` };
     } catch (error) {
+        // Rollback the transaction in case of error
+        await pool.query('ROLLBACK');
         console.error('Error updating item:', error);
-        throw new Error('Error updating the item.');
+        throw error; // Throw the original error for better debugging
     }
 }
 
@@ -136,58 +184,101 @@ async function getItemById(itemId, categoryName) {
 }
 
 async function addItem(newItemData, categoryName) {
+    const {
+        name,
+        price,
+        quantity,
+        available_sizes,
+        description,
+        category_id
+    } = newItemData;
+
     const client = await pool.connect();
 
     try {
-        const {
+        await client.query('BEGIN'); // Start transaction
+
+        // Insert into `items` table
+        const insertItemQuery = `
+            INSERT INTO items (name, price, quantity, available_sizes, description, category_id, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+            RETURNING id
+        `;
+
+        const { rows } = await client.query(insertItemQuery, [
             name,
             price,
             quantity,
             available_sizes,
             description,
-            category_id,
-            categorySpecificFields
-        } = newItemData;
-
-        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`;
-        const fields = categoryFields[categoryTable];
-
-        if (!fields) {
-            throw new Error(`Category "${categoryName}" not found.`);
-        }
-
-        await client.query('BEGIN');
-
-        const insertItemQuery = `
-            INSERT INTO items (name, price, quantity, available_sizes, description, category_id, image_url, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
-            RETURNING id
-        `;
-
-        const { rows } = await client.query(insertItemQuery, [
-            name, price, quantity, available_sizes, description, category_id, image_url
+            category_id
         ]);
 
-        const newItemId = rows[0].id;
+        const newItemId = rows[0].id; // Retrieve the new item ID
 
-        const insertCategoryQuery = `
-            INSERT INTO ${categoryTable} (item_id, ${fields.join(', ')})
-            VALUES ($1, ${fields.map((_, i) => `$${i + 2}`).join(', ')})
-        `;
+        // Prepare to insert into category-specific table
+        const categoryTable = `${categoryName.toLowerCase().replace(/ /g, '_')}`;
+        let insertCategoryQuery = '';
+        let categoryValues = [];
 
-        await client.query(insertCategoryQuery, [newItemId, ...Object.values(categorySpecificFields)]);
+        switch (categoryName) {
+            case 'boys_clothes':
+            case 'girls_clothes':
+                insertCategoryQuery = `
+                    INSERT INTO ${categoryTable} (item_id, color, material)
+                    VALUES ($1, $2, $3)
+                `;
+                categoryValues = [newItemId, newItemData.color, newItemData.material];
+                break;
+            case 'baby_gear':
+                insertCategoryQuery = `
+                    INSERT INTO ${categoryTable} (item_id, weight_capacity, dimensions)
+                    VALUES ($1, $2, $3)
+                `;
+                categoryValues = [newItemId, newItemData.weight_capacity, newItemData.dimensions];
+                break;
+            case 'feedings':
+                insertCategoryQuery = `
+                    INSERT INTO ${categoryTable} (item_id, type, age_range)
+                    VALUES ($1, $2, $3)
+                `;
+                categoryValues = [newItemId, newItemData.type, newItemData.age_range];
+                break;
+            case 'toys':
+                insertCategoryQuery = `
+                    INSERT INTO ${categoryTable} (item_id, age_range, material)
+                    VALUES ($1, $2, $3)
+                `;
+                categoryValues = [newItemId, newItemData.age_range, newItemData.material];
+                break;
+            case 'diapers':
+                insertCategoryQuery = `
+                    INSERT INTO ${categoryTable} (item_id, size, pack_size)
+                    VALUES ($1, $2, $3)
+                `;
+                categoryValues = [newItemId, categorySpecificFields.size, categorySpecificFields.pack_size];
+                break;
+            default:
+                throw new Error(`Unknown category: ${categoryName}`);
+        }
 
+        // Execute category-specific insert query
+        await client.query(insertCategoryQuery, categoryValues);
+
+        // Commit transaction
         await client.query('COMMIT');
 
+        console.log(`New item added to category "${categoryName}" with ID ${newItemId}.`);
         return { message: `Item added to category "${categoryName}" successfully`, itemId: newItemId };
     } catch (error) {
-        await client.query('ROLLBACK'); 
+        await client.query('ROLLBACK'); // Rollback transaction on error
         console.error('Error adding item:', error);
         throw new Error('Error adding item.');
     } finally {
-        client.release();
+        client.release(); // Release the client back to the pool
     }
 }
+
 
 
 

@@ -117,7 +117,7 @@ async function getItemById(itemId, categoryName) {
         const selectFields = fields.map(field => `c.${field}`).join(', ');
 
         const query = `
-            SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, i.image_url, i.description, ${selectFields}
+            SELECT i.id, i.name, i.price, i.quantity, i.available_sizes, i.description, ${selectFields}
             FROM items i
             JOIN ${categoryTable} c ON i.id = c.item_id
             WHERE i.id = $1
@@ -146,7 +146,6 @@ async function addItem(newItemData, categoryName) {
             available_sizes,
             description,
             category_id,
-            image_url,
             categorySpecificFields
         } = newItemData;
 
